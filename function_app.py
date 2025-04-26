@@ -8,6 +8,7 @@ import pandas as pd
 from azure.storage.blob import BlobServiceClient
 import io
 import concurrent.futures
+import random
 
 app = func.FunctionApp()
 
@@ -32,6 +33,10 @@ def QueueTriggerPokeRequest(azqueue: func.QueueMessage):
     
     request = get_request(id)
     pokemons = get_pokemons(request["type"])
+
+    sample_size = request.get("SampleSize")
+    if sample_size and sample_size < len(pokemons):
+        pokemons = random.sample(pokemons, sample_size)
 
     pokemons_bytes = generate_csv_to_blob(pokemons)
     blob_name = f"poke_report_{id}.csv"
